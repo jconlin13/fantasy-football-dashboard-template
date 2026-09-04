@@ -24,7 +24,7 @@ to download.
 ## Checklist
 
 - [ ] **1. Use this template.** Click the green **Use this template** button
-      at the top of this repo, choose your own account, name it whatever you
+      at the top of this repo (on the main page, not this one), choose your own account, name it whatever you
       want. This creates a brand-new, independent repo — not a fork, no
       shared history, and nothing you do in it ever touches this one.
 
