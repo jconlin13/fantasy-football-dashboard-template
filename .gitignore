@@ -1,0 +1,10 @@
+# ESPN auth cookies -- never commit
+.env
+
+# Real manager names, mapped from hashed ids. Local only.
+config/identities.local.json
+
+.DS_Store
+__pycache__/
+*.pyc
+probe-results.json

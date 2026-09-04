@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All-Time Analysis</title>
+<meta name="description" content="Every season: records, rivalries, luck, lineups and draft history.">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<header class="masthead">
+  <h1 class="wordmark">All-Time<span id="span-years">Fantasy League</span></h1>
+</header>
+
+<main>
+  <!-- Sections are tabs rather than separate pages: the whole feed is one
+       small file, so switching costs nothing and nobody waits on a page load
+       in the middle of an argument. -->
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+
+  <section class="card" id="panel">
+    <p id="loading">Loading eight seasons&hellip;</p>
+  </section>
+
+  <div class="grid">
+    <a class="tile back" href="index.html">
+      <b>&larr; Home</b>
+    </a>
+    <a class="tile" href="rosters.html">
+      <b>Rosters</b>
+      <span>Who had who, season by season</span>
+    </a>
+  </div>
+</main>
+
+<footer>
+  <p><span id="footer-league">Fantasy League</span> &middot; built from ESPN&rsquo;s own data &middot;
+     <span id="generated"></span></p>
+</footer>
+
+<script src="js/analysis.js"></script>
+</body>
+</html>

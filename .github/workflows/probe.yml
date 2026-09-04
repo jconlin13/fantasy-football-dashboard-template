@@ -1,0 +1,37 @@
+name: Probe league history
+
+# One-off diagnostic, not part of the regular pipeline. Run this from the
+# Actions tab (no local Python, no terminal needed) to find out how far back
+# your league's ESPN history actually goes before filling in league.ini's
+# first_season -- some seasons before a certain point just return an HTML
+# error page instead of real data, and that point is different per league.
+# Read the results in this run's own log.
+on:
+  workflow_dispatch:
+    inputs:
+      league_id:
+        description: "Your league id (from the ESPN URL)"
+        required: true
+      from_year:
+        description: "Earliest year to check (guess low, e.g. 2010)"
+        required: true
+        default: "2010"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Probe
+        env:
+          SWID: ${{ secrets.SWID }}
+          ESPN_S2: ${{ secrets.ESPN_S2 }}
+        run: |
+          cd pipeline
+          python3 probe.py --league-id "${{ inputs.league_id }}" --from "${{ inputs.from_year }}"

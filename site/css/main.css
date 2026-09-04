@@ -1,0 +1,845 @@
+/* Design system for the whole site.
+ *
+ * Mobile-first: everything is a single stacked column until 720px, because the
+ * league opens this on phones from a group chat. Cards on a soft field, big
+ * numbers with small uppercase labels -- the point is that a stat should be
+ * readable at arm's length without anyone squinting.
+ *
+ * Two accents, used on purpose rather than decoratively: emerald marks
+ * anything interactive -- a link, a button, a control, a paid badge -- so a
+ * border color alone tells you whether something responds to a tap. Gold
+ * marks a highlight that is not a link -- a superlative stat, a champion, a
+ * drafted-from-the-draft badge. Everything else stays neutral ink-on-white,
+ * which is what keeps two spot colors from turning into visual noise.
+ */
+
+:root {
+  --bg: #eef0f2;
+  --card: #ffffff;
+  --ink: #10141a;
+  --muted: #667085;
+  --line: #e2e5ea;
+
+  --accent: #34d399;
+  --accent-strong: #0ea472;
+  --accent-ink: #04291b;
+  --accent-soft: rgba(16, 163, 115, 0.09);
+  --accent-soft-strong: rgba(16, 163, 115, 0.16);
+
+  --gold: #c8891f;
+  --gold-strong: #a3700f;
+  --gold-ink: #3a2705;
+  --gold-soft: rgba(200, 137, 31, 0.10);
+  --gold-soft-strong: rgba(200, 137, 31, 0.18);
+
+  --danger: #dc2626;
+
+  --shadow: 0 1px 2px rgba(16, 20, 26, 0.05), 0 1px 1px rgba(16, 20, 26, 0.04);
+  --shadow-lg: 0 10px 24px -8px rgba(16, 20, 26, 0.16);
+  --shadow-accent: 0 8px 20px -6px rgba(16, 163, 115, 0.35);
+
+  --radius: 18px;
+  --gap: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1013;
+    --card: #171b21;
+    --ink: #f2f4f7;
+    --muted: #9aa4b1;
+    --line: #272e37;
+
+    --accent: #34d399;
+    --accent-strong: #5eead4;
+    --accent-ink: #04291b;
+    --accent-soft: rgba(52, 211, 153, 0.10);
+    --accent-soft-strong: rgba(52, 211, 153, 0.18);
+
+    --gold: #e8b04b;
+    --gold-strong: #f4c669;
+    --gold-ink: #2c1e02;
+    --gold-soft: rgba(232, 176, 75, 0.12);
+    --gold-soft-strong: rgba(232, 176, 75, 0.2);
+
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 12px 28px -10px rgba(0, 0, 0, 0.6);
+    --shadow-accent: 0 0 0 1px rgba(52, 211, 153, 0.25), 0 8px 24px -6px rgba(52, 211, 153, 0.25);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0 14px 48px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 26px 0 18px;
+  text-align: center;
+}
+
+.wordmark {
+  margin: 0;
+  font-size: clamp(30px, 9vw, 46px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.wordmark span {
+  display: block;
+  margin-top: 8px;
+  font-size: clamp(11px, 3vw, 14px);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* A short two-tone underline ties every page back to the same two accents
+   without needing a logo -- the field-and-trophy pairing shows up before any
+   content does. */
+.wordmark::after {
+  content: "";
+  display: block;
+  width: 46px;
+  height: 4px;
+  margin: 14px auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+}
+
+.masthead .updated {
+  margin: 14px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- layout ---------- */
+
+main {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* The splash page has no masthead above it -- the hero card is the page's
+   only header now -- so it needs its own top breathing room instead of
+   inheriting it from .masthead's padding the way the other two pages do. */
+main.no-masthead {
+  padding-top: 28px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap);
+}
+
+@media (min-width: 720px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+  /* Splash page only -- these ids exist nowhere else, so this can't leak into
+     the plain two-tile grids on the other pages.
+     Countdown spans the full width up top; draft and dues sit side by side
+     underneath it (auto-placed into row 2 in DOM order, no rule needed for
+     either); the order list spans full width again below both. */
+  #countdown-card,
+  #order-card {
+    grid-column: 1 / -1;
+  }
+  /* The grid's own align-items:start leaves draft-card and dues-card each
+     sized to their own content, so a longer draft time/location can make
+     one visibly taller than the other. Stretch just these two to match
+     whichever is tallest, then pin each card's button to the bottom of that
+     shared height so the shorter card doesn't end with dead space above its
+     button. */
+  #draft-card,
+  #dues-card {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+  }
+  #draft-card .btn,
+  #draft-card .gate,
+  #dues-card .btn {
+    margin-top: auto;
+  }
+}
+
+/* ---------- cards ---------- */
+
+/* Informational by default: a quiet neutral border. Nothing here responds to
+   a tap, so nothing here borrows the accent color -- that's reserved for
+   things that do. */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: var(--gap);
+}
+
+.grid .card {
+  margin-bottom: 0;
+}
+
+.card h2 {
+  margin: 0 0 14px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--line);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hero {
+  text-align: center;
+  padding: 26px 20px;
+  background: linear-gradient(180deg, var(--accent-soft), transparent 65%);
+}
+
+.hero h2 {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: clamp(26px, 7.5vw, 40px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: var(--ink);
+}
+
+.hero .kind {
+  margin: 10px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+/* ---------- countdown ---------- */
+
+.clock {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  text-align: center;
+}
+
+.clock div {
+  padding: 0 2px;
+}
+
+.clock b {
+  display: block;
+  font-size: clamp(26px, 8vw, 38px);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--accent-strong);
+}
+
+.clock small {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- draft details ---------- */
+
+.when {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.where {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+  color: var(--accent-ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-accent);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.btn.secondary {
+  background: transparent;
+  border: 2px solid var(--line);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+/* ---------- dues ---------- */
+
+.amount {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- draft order ---------- */
+
+.order ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.order li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.order li:last-child {
+  border-bottom: 0;
+}
+
+.order .pick {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 26px;
+  text-align: center;
+}
+
+.order .name {
+  flex: 1;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.badge {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.badge.paid {
+  background: var(--accent-soft-strong);
+  color: var(--accent-ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.paid {
+    color: var(--accent-strong);
+  }
+}
+
+/* A partial-payment state gets its own tone rather than the same gray as
+   "nothing has happened yet" -- gold reads as "in progress," not "done" and
+   not "ignored." */
+.badge.partial {
+  background: var(--gold-soft-strong);
+  color: var(--gold-ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.partial {
+    color: var(--gold-strong);
+  }
+}
+
+/* A drafted pick carries real data (round.pick) worth setting apart from a
+   free-agent add, which didn't come from an event worth marking. */
+.badge.drafted {
+  background: var(--gold-soft);
+  color: var(--gold-ink);
+  border: 1px solid var(--gold-soft-strong);
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge.drafted {
+    color: var(--gold-strong);
+  }
+}
+
+/* ---------- gate ---------- */
+
+.gate {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.gate input {
+  flex: 1;
+  min-width: 0;
+  padding: 13px 16px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+}
+
+.gate input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.gate .btn {
+  width: auto;
+  margin-top: 0;
+  padding: 13px 20px;
+}
+
+.gate-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.gate-note.error {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+/* ---------- big link tile ---------- */
+
+/* Interactive, so it borrows the same accent language as a button: a real
+   border in the accent color instead of the neutral line a plain card gets,
+   plus a hover lift so a pointer confirms what the border already implied. */
+.tile {
+  display: block;
+  margin-top: 26px;
+  padding: 26px 20px;
+  border: 2px solid var(--accent-soft-strong);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  color: inherit;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.tile:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.tile:active {
+  transform: translateY(0);
+}
+
+.tile b {
+  display: block;
+  font-size: clamp(22px, 6vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* A plain arrow rather than a phrase -- the affordance is the glyph and the
+   border, not a line of copy explaining that a link is a link. */
+.tile b::after {
+  content: "→";
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--accent-strong);
+  transition: transform 0.15s ease;
+}
+
+.tile:hover b::after {
+  transform: translateX(3px);
+}
+
+/* The Home link already carries its own literal "←" -- appending the
+   forward arrow on top of that reads as "go both ways," so it's suppressed
+   here rather than on every tile that's actually pointing forward. */
+.tile.back b::after {
+  content: none;
+}
+
+.tile span {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---------- footer ---------- */
+
+footer {
+  max-width: 860px;
+  margin: 30px auto 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- tabs ---------- */
+
+/* A horizontal strip of chips that scrolls sideways on a phone rather than
+   wrapping into a block of buttons that pushes the content off screen. */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin: 0 -14px 18px;
+  padding: 0 14px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tabs button {
+  flex: none;
+  padding: 9px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.tabs button:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.tabs button[aria-selected="true"] {
+  background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+  border-color: transparent;
+  color: var(--accent-ink);
+  box-shadow: var(--shadow-accent);
+}
+
+/* ---------- tables ----------
+ *
+ * Data columns are centered rather than right-aligned. Right-align is the
+ * textbook choice for a column of same-precision numbers -- it stacks the
+ * decimal points -- but these columns are not that: a badge next to a plain
+ * float next to a signed delta next to "#81" next to "2020 wk16". Forcing
+ * all of that against one shared right edge just staggers the *left* edge
+ * of every cell instead, which reads as uneven rather than aligned. Centered,
+ * each cell sits in the middle of its own lane regardless of format, and the
+ * table reads as organized even though the data itself is mixed.
+ */
+
+.scroller {
+  margin: 0 -20px;
+  padding: 0 20px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+th {
+  padding: 0 0 8px;
+  border-bottom: 2px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+}
+
+th:first-child,
+td:first-child {
+  text-align: left;
+}
+
+td {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+td:first-child {
+  font-weight: 700;
+}
+
+th + th,
+td + td {
+  padding-left: 20px;
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+tbody tr {
+  transition: background-color 0.1s ease;
+}
+
+tbody tr:hover {
+  background: var(--accent-soft);
+}
+
+.pos {
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.neg {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+/* ---------- record / stat rows ---------- */
+
+.stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 13px 0 13px 14px;
+  border-bottom: 1px solid var(--line);
+  border-left: 3px solid var(--gold-soft-strong);
+}
+
+.stat:last-child {
+  border-bottom: 0;
+}
+
+.stat .label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.stat .value {
+  font-size: 22px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  color: var(--gold-strong);
+  /* Centered, not right-aligned. Right-align only fixed HALF the problem --
+     it pinned both lines to the same edge, but a short value like "0.1" or
+     "9" still read as visually orphaned above a much longer caption below
+     it, because the two no longer shared any relationship except one edge.
+     Centering puts the value over the middle of its own caption regardless
+     of either one's length, so the two read as one unit -- the same pattern
+     the countdown clock already uses (.clock b centered over .clock small). */
+  text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  .stat .value {
+    color: var(--gold);
+  }
+}
+
+.stat .who {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ---------- explainer ---------- */
+
+/* Every stat carries its definition. A number nobody can explain just starts a
+   new argument about the number. */
+.explain {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--accent-soft);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* ---------- picker ---------- */
+
+/* Interactive controls get the accent border too, same language as a tile or
+   a button -- the whole point is that "has an accent border" reliably means
+   "does something when you touch it," everywhere on the site. */
+select {
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 2px solid var(--accent-soft-strong);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  transition: border-color 0.12s ease;
+}
+
+select:hover {
+  border-color: var(--accent);
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft-strong);
+}
+
+/* ---------- champions ---------- */
+
+.champ {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 10px;
+  transition: background-color 0.12s ease;
+}
+
+.champ:hover {
+  background: var(--gold-soft);
+}
+
+.champ:last-child {
+  border-bottom: 0;
+}
+
+.champ .year {
+  flex: none;
+  width: 52px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.champ .name {
+  flex: 1;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.champ .rings {
+  flex: none;
+  font-size: 15px;
+}
+
+/* Sub-headings inside a panel: quieter than the card title above them, but
+   still clearly a break between two different tables. */
+.card h3 {
+  margin: 26px 0 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.card h3:first-of-type {
+  margin-top: 8px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.champ .rings .badge {
+  margin-left: 8px;
+  background: var(--gold-soft-strong);
+  color: var(--gold-ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  .champ .rings .badge {
+    color: var(--gold-strong);
+  }
+}

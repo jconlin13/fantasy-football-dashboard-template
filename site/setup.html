@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setup Wizard</title>
+<meta name="description" content="Generate your config/league.ini and config/draft.ini content -- nothing here is sent anywhere.">
+<link rel="stylesheet" href="css/main.css">
+<style>
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    margin: 10px 0 4px;
+    padding: 14px;
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--ink);
+    font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    resize: vertical;
+  }
+  label {
+    display: block;
+    margin-top: 16px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    margin-top: 6px;
+    padding: 12px 14px;
+    border: 2px solid var(--accent-soft-strong);
+    border-radius: 12px;
+    background: var(--card);
+    color: var(--ink);
+    font: inherit;
+    font-size: 15px;
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+  .field-hint { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+  .copied { color: var(--accent-strong); font-weight: 800; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <h1 class="wordmark">Setup Wizard<span>Fantasy League Dashboard</span></h1>
+</header>
+
+<main>
+  <section class="card">
+    <p class="explain" style="margin-bottom:20px">
+      This page runs entirely in your browser. Nothing you type here is sent
+      anywhere, saved anywhere, or seen by anyone — it just reformats what you
+      type into the two config files this project actually reads. Fill in
+      what you know; leave the rest blank and come back to it. Full context
+      for every field is in <b>SETUP.md</b>, in the repo this page belongs to.
+    </p>
+
+    <label for="league-url">Your ESPN league URL, or just the id</label>
+    <input type="text" id="league-url" placeholder="fantasy.espn.com/football/team?leagueId=1234567&...">
+    <p class="field-hint" id="league-id-readout"></p>
+
+    <label for="current-season">Current season</label>
+    <input type="number" id="current-season" placeholder="2026">
+
+    <label for="first-season">First season (leave blank if you don't know yet)</label>
+    <input type="text" id="first-season" placeholder="Run the Probe workflow first — see SETUP.md step 6">
+
+    <label for="location">Draft location</label>
+    <input type="text" id="location" placeholder="Zoom, or wherever it actually happens">
+
+    <label for="amount">Dues amount</label>
+    <input type="text" id="amount" placeholder="$50">
+
+    <label for="venmo">Venmo handle</label>
+    <input type="text" id="venmo" placeholder="just the part after the @">
+  </section>
+
+  <section class="card">
+    <h2>config/league.ini</h2>
+    <textarea id="league-out" readonly></textarea>
+    <button class="btn secondary" id="copy-league" type="button" style="margin-top:8px">Copy</button>
+  </section>
+
+  <section class="card">
+    <h2>config/draft.ini</h2>
+    <textarea id="draft-out" readonly></textarea>
+    <button class="btn secondary" id="copy-draft" type="button" style="margin-top:8px">Copy</button>
+  </section>
+
+  <p class="explain">This page only generates the two snippets above. For
+     everything else -- secrets, GitHub Pages, running the workflows -- open
+     <b>SETUP.md</b> in your repo's own file list on GitHub.</p>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+
+  function extractLeagueId(text) {
+    text = (text || "").trim();
+    var match = text.match(/leagueId=(\d+)/);
+    if (match) { return match[1]; }
+    // Bare id pasted directly, e.g. "1234567".
+    if (/^\d+$/.test(text)) { return text; }
+    return "";
+  }
+
+  function buildLeagueIni() {
+    var id = extractLeagueId($("league-url").value);
+    $("league-id-readout").textContent = id
+      ? "Found league id: " + id
+      : ($("league-url").value ? "Couldn't find a league id in that -- paste the full URL or just the number." : "");
+
+    var current = $("current-season").value.trim();
+    var first = $("first-season").value.trim();
+    var onlyDigits = /^\d+$/.test(first);
+
+    return [
+      "[league]",
+      "id = " + id,
+      "first_season = " + (onlyDigits ? first : ""),
+      "current_season = " + current,
+      ""
+    ].join("\n");
+  }
+
+  function buildDraftIni() {
+    var location = $("location").value.trim();
+    var amount = $("amount").value.trim();
+    var venmo = $("venmo").value.trim().replace(/^@/, "");
+
+    return [
+      "[draft]",
+      "datetime =",
+      "label =",
+      "kind =",
+      "location = " + location,
+      "passphrase_sha256 =",
+      "",
+      "[dues]",
+      "amount = " + amount,
+      "venmo_username = " + venmo,
+      "",
+      "[order]",
+      "# 1 = Alex, paid"
+    ].join("\n");
+  }
+
+  function refresh() {
+    $("league-out").value = buildLeagueIni();
+    $("draft-out").value = buildDraftIni();
+  }
+
+  ["league-url", "current-season", "first-season", "location", "amount", "venmo"]
+    .forEach(function (id) { $(id).addEventListener("input", refresh); });
+
+  function wireCopy(buttonId, textareaId) {
+    var button = $(buttonId);
+    var original = button.textContent;
+
+    function flash(text) {
+      button.textContent = text;
+      setTimeout(function () { button.textContent = original; }, 1800);
+    }
+
+    button.addEventListener("click", function () {
+      var field = $(textareaId);
+      field.select();
+
+      // Some browsers refuse clipboard writes outside a context they trust
+      // (this page over plain http, certain automated tools, older Safari).
+      // The text is already selected either way, so the honest fallback is
+      // "press Cmd/Ctrl+C yourself" rather than pretending it worked.
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        flash("Selected -- press ⌘C / Ctrl+C");
+        return;
+      }
+      navigator.clipboard.writeText(field.value)
+        .then(function () { flash("Copied"); })
+        .catch(function () { flash("Selected -- press ⌘C / Ctrl+C"); });
+    });
+  }
+  wireCopy("copy-league", "league-out");
+  wireCopy("copy-draft", "draft-out");
+
+  refresh();
+}());
+</script>
+</body>
+</html>
