@@ -11,10 +11,10 @@ to download.
 ## Before you start
 
 - You need to be a member of the ESPN league you're pointing this at.
-- You need a (free) GitHub account of your own. **Not this one** — click
-  **Use this template** (green button, top of this repo) to get your own
+- You need a (free) GitHub account of your own. **ESSENTIAL**: On the main fantasy-football-dashboard-template page, click
+  **Use this template** (green button, top of the repo page) to get your own
   independent copy first. Your copy shares no data and no credentials with
-  this one or with anyone else's copy.
+  this original one or with anyone else's copy.
 - If your league is **private** (most are — check by opening it in an
   incognito window while logged out of ESPN; if it asks you to sign in,
   it's private), you'll need two cookie values from your own ESPN login.
