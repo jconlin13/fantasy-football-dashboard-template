@@ -33,11 +33,53 @@ to download.
       the number after `leagueId=` is what you need.
 
 - [ ] **3. If your league is private, get your two cookie values.**
-      Sign in to fantasy.espn.com in a real browser, then:
-      Chrome/Edge → DevTools (F12) → Application tab → Cookies →
-      `https://fantasy.espn.com` → find `SWID` and `espn_s2`, copy each
-      value. (Firefox: Storage tab instead of Application. Safari: enable
-      the Develop menu first, then Storage.)
+      Sign in to fantasy.espn.com in a real browser first — the cookies
+      only exist once you're logged in. Then find two cookies named `SWID`
+      and `espn_s2` under `https://fantasy.espn.com` using your browser's
+      dev tools. Not sure which browser you're on? Check its icon in your
+      dock/taskbar rather than guessing — the steps below don't overlap
+      between browsers, and following the wrong one is the most common way
+      to get stuck here.
+
+      **Chrome or Edge:**
+      1. Press `F12` (Windows) or `Cmd+Option+I` (Mac) to open DevTools.
+      2. Click the **Application** tab along the top of the DevTools panel.
+         If you don't see it, click the `»` overflow arrow to find it.
+      3. In the left sidebar under **Storage**, expand **Cookies** and
+         click `https://fantasy.espn.com`.
+      4. Find the rows named `SWID` and `espn_s2`. Click a row's **Value**
+         cell, select all the text in it, and copy — the column is often
+         too narrow to show the full value, so widen it or double-click
+         into the cell first rather than copying what's visible.
+
+      **Firefox:**
+      1. Press `F12` (Windows) or `Cmd+Option+I` (Mac) to open DevTools.
+      2. Click the **Storage** tab (Firefox doesn't call this Application).
+      3. In the left sidebar, expand **Cookies** and click
+         `https://fantasy.espn.com`.
+      4. Same as above: click into each value cell for `SWID` and `espn_s2`
+         and copy the full value, not the truncated display.
+
+      **Safari (Mac only) — this is the one people get stuck on:**
+      Safari hides its dev tools by default, and its layout doesn't match
+      Chrome's at all, so don't try to follow the Chrome steps here.
+      1. Enable the Develop menu, if you haven't already: Safari menu →
+         **Settings** (**Preferences** on older macOS) → **Advanced** tab →
+         check **Show features for web developers** / **Show Develop menu
+         in menu bar** (wording varies by macOS version).
+      2. Back on fantasy.espn.com, open **Develop → Show Web Inspector**
+         (or `Cmd+Option+I`).
+      3. Click the **Storage** tab in the panel that opens.
+      4. Expand **Cookies** in the sidebar → click `https://fantasy.espn.com`.
+      5. Click the `SWID` row, then read the full value from the detail
+         pane below the table — Safari truncates long values in the row
+         itself and won't let you select from there. Copy from the detail
+         pane. Do the same for `espn_s2`.
+      6. Paste into a plain text field (like the notes app) before pasting
+         into GitHub, and check there's no stray space or line break at the
+         start or end — Safari copies have occasionally carried one, and a
+         copy that looks identical but isn't is the hardest kind to
+         troubleshoot later.
 
       Skip this step entirely if your league is public.
 
@@ -108,7 +150,9 @@ change dues, the draft order, or anything else in `config/`.
 
 - **Refresh workflow fails immediately on the fetch step** — almost always a
   wrong `id` in `league.ini`, or (for a private league) a cookie value that
-  got truncated or mistyped when pasted into the secret.
+  got truncated or mistyped when pasted into the secret. If you copied the
+  cookies from Safari, this is the first thing to double-check — see the
+  note in step 3.
 - **Every season fails, even ones that should exist** — check `SWID` still
   has its curly braces; ESPN wants them.
 - **Validation step fails** — this is the pipeline refusing to publish data
