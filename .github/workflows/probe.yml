@@ -29,9 +29,20 @@ jobs:
         with:
           python-version: "3.11"
       - name: Probe
+        # league_id and from_year are typed by whoever runs this from the
+        # Actions tab. Interpolating ${{ inputs.x }} straight into the shell
+        # script text (the pattern this replaced) means GitHub substitutes
+        # the raw input into the script *before* the shell ever sees it --
+        # a value containing shell metacharacters becomes new commands, run
+        # in this same step where SWID/ESPN_S2 already sit in the
+        # environment. Routing both through env: instead means the shell
+        # only ever sees them as the *value* of a variable, never as script
+        # source, so nothing in them can execute regardless of what's typed.
         env:
           SWID: ${{ secrets.SWID }}
           ESPN_S2: ${{ secrets.ESPN_S2 }}
+          LEAGUE_ID: ${{ inputs.league_id }}
+          FROM_YEAR: ${{ inputs.from_year }}
         run: |
           cd pipeline
-          python3 probe.py --league-id "${{ inputs.league_id }}" --from "${{ inputs.from_year }}"
+          python3 probe.py --league-id "$LEAGUE_ID" --from "$FROM_YEAR"
